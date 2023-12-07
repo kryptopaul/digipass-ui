@@ -1,113 +1,310 @@
-import Image from 'next/image'
+"use client";
+import dynamic from 'next/dynamic'
+ import { Fragment } from "react";
+import { Menu, Popover, Transition } from "@headlessui/react";
+import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
+import Image from "next/image";
+import Stats from "@/components/stats";
+import LastTravels from "@/components/lasttravels";
+import { useAccount, useConnect, useDisconnect } from "wagmi";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
+const user = {
+  name: "Tom Cook",
+  email: "tom@example.com",
+  imageUrl:
+    "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+};
+const navigation = [
+  { name: "Home", href: "#", current: true },
+  { name: "Profile", href: "#", current: false },
+  { name: "Resources", href: "#", current: false },
+  { name: "Company Directory", href: "#", current: false },
+  { name: "Openings", href: "#", current: false },
+];
+const userNavigation = [
+  { name: "Your Profile", href: "#" },
+  { name: "Settings", href: "#" },
+  { name: "Sign out", href: "#" },
+];
+
+function classNames(...classes: string[]) {
+  return classes.filter(Boolean).join(" ");
+}
 
 export default function Home() {
+  const { address, isConnected } = useAccount();
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
+    <>
+      <div className="min-h-full bg-gray-50">
+        <Popover as="header" className="bg-electric-violet-600 pb-24">
+          {({ open }) => (
+            <>
+              <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:max-w-7xl lg:px-8">
+                <div className="relative flex items-center justify-center py-5 lg:justify-between">
+                  {/* Logo */}
+                  <div className="absolute left-0 flex-shrink-0 lg:static">
+                    <a href="#">
+                      <span className="sr-only">Your Company</span>
+                      <h1 className="text-white text-2xl font-light">
+                        TravelCard
+                      </h1>
+                    </a>
+                  </div>
+
+                  {/* Right section on desktop */}
+                  <div className="hidden lg:ml-4 lg:flex lg:items-center lg:pr-0.5">
+                    <button
+                      type="button"
+                      className="relative flex-shrink-0 rounded-full p-1 text-indigo-200 hover:bg-white hover:bg-opacity-10 hover:text-white focus:outline-none focus:ring-2 focus:ring-white"
+                    >
+                      <span className="absolute -inset-1.5" />
+                      <span className="sr-only">View notifications</span>
+                      <BellIcon className="h-6 w-6" aria-hidden="true" />
+                    </button>
+
+                    {/* Profile dropdown */}
+                    <Menu as="div" className="relative ml-4 flex-shrink-0">
+                      <ConnectButton />
+
+                      <Transition
+                        as={Fragment}
+                        leave="transition ease-in duration-75"
+                        leaveFrom="transform opacity-100 scale-100"
+                        leaveTo="transform opacity-0 scale-95"
+                      >
+                        <Menu.Items className="absolute -right-2 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                          {userNavigation.map((item) => (
+                            <Menu.Item key={item.name}>
+                              {({ active }) => (
+                                <a
+                                  href={item.href}
+                                  className={classNames(
+                                    active ? "bg-gray-100" : "",
+                                    "block px-4 py-2 text-sm text-gray-700"
+                                  )}
+                                >
+                                  {item.name}
+                                </a>
+                              )}
+                            </Menu.Item>
+                          ))}
+                        </Menu.Items>
+                      </Transition>
+                    </Menu>
+                  </div>
+                </div>
+              </div>
+
+              <Transition.Root as={Fragment}>
+                <div className="lg:hidden">
+                  <Transition.Child
+                    as={Fragment}
+                    enter="duration-150 ease-out"
+                    enterFrom="opacity-0"
+                    enterTo="opacity-100"
+                    leave="duration-150 ease-in"
+                    leaveFrom="opacity-100"
+                    leaveTo="opacity-0"
+                  >
+                    <Popover.Overlay className="fixed inset-0 z-20 bg-black bg-opacity-25" />
+                  </Transition.Child>
+
+                  <Transition.Child
+                    as={Fragment}
+                    enter="duration-150 ease-out"
+                    enterFrom="opacity-0 scale-95"
+                    enterTo="opacity-100 scale-100"
+                    leave="duration-150 ease-in"
+                    leaveFrom="opacity-100 scale-100"
+                    leaveTo="opacity-0 scale-95"
+                  >
+                    <Popover.Panel
+                      focus
+                      className="absolute inset-x-0 top-0 z-30 mx-auto w-full max-w-3xl origin-top transform p-2 transition"
+                    >
+                      <div className="divide-y divide-gray-200 rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5">
+                        <div className="pb-2 pt-3">
+                          <div className="flex items-center justify-between px-4">
+                            <div>
+                              <img
+                                className="h-8 w-auto"
+                                src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600"
+                                alt="Your Company"
+                              />
+                            </div>
+                            <div className="-mr-2">
+                              <Popover.Button className="relative inline-flex items-center justify-center rounded-md bg-white p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500">
+                                <span className="absolute -inset-0.5" />
+                                <span className="sr-only">Close menu</span>
+                                <XMarkIcon
+                                  className="h-6 w-6"
+                                  aria-hidden="true"
+                                />
+                              </Popover.Button>
+                            </div>
+                          </div>
+                          <div className="mt-3 space-y-1 px-2">
+                            <a
+                              href="#"
+                              className="block rounded-md px-3 py-2 text-base font-medium text-gray-900 hover:bg-gray-100 hover:text-gray-800"
+                            >
+                              Home
+                            </a>
+                            <a
+                              href="#"
+                              className="block rounded-md px-3 py-2 text-base font-medium text-gray-900 hover:bg-gray-100 hover:text-gray-800"
+                            >
+                              Profile
+                            </a>
+                            <a
+                              href="#"
+                              className="block rounded-md px-3 py-2 text-base font-medium text-gray-900 hover:bg-gray-100 hover:text-gray-800"
+                            >
+                              Resources
+                            </a>
+                            <a
+                              href="#"
+                              className="block rounded-md px-3 py-2 text-base font-medium text-gray-900 hover:bg-gray-100 hover:text-gray-800"
+                            >
+                              Company Directory
+                            </a>
+                            <a
+                              href="#"
+                              className="block rounded-md px-3 py-2 text-base font-medium text-gray-900 hover:bg-gray-100 hover:text-gray-800"
+                            >
+                              Openings
+                            </a>
+                          </div>
+                        </div>
+                        <div className="pb-2 pt-4">
+                          <div className="flex items-center px-5">
+                            <div className="flex-shrink-0">
+                              <img
+                                className="h-10 w-10 rounded-full"
+                                src={user.imageUrl}
+                                alt=""
+                              />
+                            </div>
+                            <div className="ml-3 min-w-0 flex-1">
+                              <div className="truncate text-base font-medium text-gray-800">
+                                {user.name}
+                              </div>
+                              <div className="truncate text-sm font-medium text-gray-500">
+                                {user.email}
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              className="relative ml-auto flex-shrink-0 rounded-full bg-white p-1 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                            >
+                              <span className="absolute -inset-1.5" />
+                              <span className="sr-only">
+                                View notifications
+                              </span>
+                              <BellIcon
+                                className="h-6 w-6"
+                                aria-hidden="true"
+                              />
+                            </button>
+                          </div>
+                          <div className="mt-3 space-y-1 px-2">
+                            {userNavigation.map((item) => (
+                              <a
+                                key={item.name}
+                                href={item.href}
+                                className="block rounded-md px-3 py-2 text-base font-medium text-gray-900 hover:bg-gray-100 hover:text-gray-800"
+                              >
+                                {item.name}
+                              </a>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </Popover.Panel>
+                  </Transition.Child>
+                </div>
+              </Transition.Root>
+            </>
+          )}
+        </Popover>
+        <main className="-mt-24 pb-8">
+          <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:max-w-7xl lg:px-8">
+            <h1 className="sr-only">Page title</h1>
+            {/* Main 3 column grid */}
+            <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-3 lg:gap-8">
+              {/* Left column */}
+              <div className="grid grid-cols-1 gap-4 lg:col-span-2">
+                <section aria-labelledby="section-1-title">
+                  <h2 className="sr-only" id="section-1-title">
+                    Section title
+                  </h2>
+                  <div className="overflow-hidden rounded-lg bg-white shadow">
+                    {isConnected ? (
+                      <div className="p-6">
+                        <h1 className="text-2xl font-semibold text-gray-900">
+                          Welcome back, kryptopaul.eth!
+                        </h1>
+                        <p className="mt-2 text-sm text-gray-500">
+                          Take a look at your current statistics.
+                        </p>
+                        <Stats />
+                        <br />
+                        <LastTravels />
+                      </div>
+                    ) : (
+                      <div className="p-6">
+                        <h1 className="text-2xl font-semibold text-gray-900">
+                          Welcome to your TravelCard!
+                        </h1>
+                        <p className="mt-2 text-sm text-gray-500">
+                          Please connect your wallet to continue.
+                        </p>
+                        <br/>
+                        <ConnectButton />
+                      </div>
+                    )}
+                  </div>
+                </section>
+              </div>
+
+              {/* Right column */}
+              <div className="grid grid-cols-1 gap-4">
+                <section aria-labelledby="section-2-title">
+                  <h2 className="sr-only" id="section-2-title">
+                    Section title
+                  </h2>
+                  <div className="overflow-hidden rounded-lg bg-white shadow">
+                    <div className="p-2">
+                      <Image
+                        src="/nft2.png"
+                        width="1000"
+                        height="1000"
+                        alt="nft"
+                        style={{
+                          borderRadius: 5,
+                          filter: isConnected ? "" : "blur(10px)"
+                        }}
+                      />
+                    </div>
+                  </div>
+                </section>
+              </div>
+            </div>
+          </div>
+        </main>
+        <footer>
+          <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:max-w-7xl lg:px-8">
+            <div className="border-t border-gray-200 py-8 text-center text-sm text-gray-500 sm:text-left">
+              <span className="block sm:inline">
+                &copy; 2021 Your Company, Inc.
+              </span>{" "}
+              <span className="block sm:inline">All rights reserved.</span>
+            </div>
+          </div>
+        </footer>
       </div>
-
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore the Next.js 13 playground.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  )
+    </>
+  );
 }
