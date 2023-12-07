@@ -32,6 +32,7 @@ export async function GET(request: Request) {
   if (!destination) {
     return Response.json({ error: "Missing destination" }, { status: 400 });
   }
+  // @ts-ignore lmeow
   const price = stations[destination];
   return Response.json({ destination, price });
 }
