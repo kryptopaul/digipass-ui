@@ -12,16 +12,20 @@ import {
 import { useContractRead, useAccount } from "wagmi";
 import { abi } from "../abi";
 
-function calculateTotalPrice(items: Travel[]) {
+function calculateTotalPrice(items: Travel[], tokenId: number) {
   return (
     items
       .reduce((sum, item) => {
-        let price = parseFloat(item.price.replace("£", ""));
+        let price = 0; // Initialize price with a default value
+        if (Number(item.tokenId) === Number(tokenId)) {
+          price = parseFloat(item.price.replace("£", ""));
+        }
         return sum + price;
       }, 0)
       .toFixed(2) + "£"
   );
 }
+
 interface Travel {
   chainlinkId: `0x${string}`;
   tokenId: bigint;
@@ -31,7 +35,8 @@ interface Travel {
   uri: string;
 }
 function countTokenIdOccurrences(items: Travel[], tokenId: number) {
-  return items.filter((item) => Number(item.tokenId) === Number(tokenId)).length;
+  return items.filter((item) => Number(item.tokenId) === Number(tokenId))
+    .length;
 }
 
 export default function Stats() {
@@ -100,7 +105,7 @@ export default function Stats() {
           <dd className="ml-16 flex items-baseline pb-5">
             <p className="text-2xl font-semibold text-gray-900">
               {/* @ts-ignore lmeow*/}
-              {travels && calculateTotalPrice(travels)}
+              {travels && calculateTotalPrice(travels, tokenId[0])}
             </p>
           </dd>
         </div>
