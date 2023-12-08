@@ -13,11 +13,16 @@
   ```
 */
 
-"use client"
-import { useContractWrite, usePrepareContractWrite } from "wagmi";
-import {abi} from "../abi";
+"use client";
+import { useContractWrite, useWaitForTransaction } from "wagmi";
+import { abi } from "../abi";
 import { useState } from "react";
-import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
+import {
+  CheckIcon,
+  ChevronUpDownIcon,
+  XMarkIcon,
+  CheckCircleIcon,
+} from "@heroicons/react/20/solid";
 import { Combobox } from "@headlessui/react";
 import axios from "axios";
 
@@ -55,16 +60,26 @@ function classNames(...classes: any) {
 }
 
 export default function Tap() {
-  const { config } = usePrepareContractWrite({
+  const [selectedStation, setSelectedStation] = useState(stations[0]);
+  const [imageUrl, setImageUrl] = useState("");
+
+  const { data, isLoading, isSuccess, write } = useContractWrite({
     address: "0xa342ADDe4b4170Ac2aeD0aFf782BCa296c9d4465",
     abi: abi,
     functionName: "sendRequest",
     chainId: 43113,
   });
-  const { data, isLoading, isSuccess, write } = useContractWrite(config);
+
+  const {
+    data: confirmed,
+    isError,
+    isLoading: loadingTx,
+  } = useWaitForTransaction({
+    hash: data?.hash,
+    confirmations: 1,
+  });
 
   const [query, setQuery] = useState("");
-  const [selectedStation, setSelectedStation] = useState(stations[0]);
 
   const [loading, setLoading] = useState(false);
 
@@ -79,7 +94,10 @@ export default function Tap() {
     );
     const { url } = request.data;
     console.log(url);
-    setLoading(false);
+    setImageUrl(url);
+    write({
+      args: [BigInt(1802), [selectedStation.name], url],
+    });
   }
 
   return (
@@ -145,6 +163,9 @@ export default function Tap() {
         </div>
       </Combobox>
       <button
+        style={{
+          display: confirmed ? "none" : "block",
+        }}
         disabled={loading}
         onClick={() => generateImage()}
         className={`inline-flex items-center gap-x-1.5 rounded-md px-3 py-2 text-sm font-semibold shadow-sm justify-center ${
@@ -155,6 +176,26 @@ export default function Tap() {
       >
         {loading ? "Loading..." : "Tap"}
       </button>
+      <div
+        style={{
+          display: confirmed ? "block" : "none",
+        }}
+      >
+        <div className="rounded-md bg-green-50 p-4">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <CheckCircleIcon
+                className="h-5 w-5 text-green-400"
+                aria-hidden="true"
+              />
+            </div>
+            <div className="ml-3">
+              <p className="text-sm font-medium text-green-800">Success</p>
+            </div>
+            <div className="ml-auto pl-3"></div>
+          </div>
+        </div>
+      </div>
     </>
   );
 }

@@ -7,7 +7,7 @@ import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
 import Image from "next/image";
 import Stats from "@/components/stats";
 import LastTravels from "@/components/lasttravels";
-import { useAccount, useConnect, useDisconnect } from "wagmi";
+import { useAccount, useConnect, useDisconnect,useEnsName } from "wagmi";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import Tap from '@/components/tap';
 const user = {
@@ -35,7 +35,9 @@ function classNames(...classes: string[]) {
 
 export default function Home() {
   const { address, isConnected } = useAccount();
-
+  const { data, isError, isLoading } = useEnsName({
+    address: address,
+  })
   return (
     <>
       <div className="min-h-full bg-gray-50">
@@ -245,7 +247,7 @@ export default function Home() {
                     {isConnected ? (
                       <div className="p-6">
                         <h1 className="text-2xl font-semibold text-gray-900">
-                          Welcome back, kryptopaul.eth!
+                          {data ? `Welcome back, ${data}!` : "Welcome back!"}
                         </h1>
                         <p className="mt-2 text-sm text-gray-500">
                           Take a look at your current statistics.
