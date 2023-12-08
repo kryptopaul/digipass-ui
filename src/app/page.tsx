@@ -9,6 +9,7 @@ import Stats from "@/components/stats";
 import LastTravels from "@/components/lasttravels";
 import { useAccount, useConnect, useDisconnect } from "wagmi";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import Tap from '@/components/tap';
 const user = {
   name: "Tom Cook",
   email: "tom@example.com",
@@ -46,9 +47,9 @@ export default function Home() {
                   {/* Logo */}
                   <div className="absolute left-0 flex-shrink-0 lg:static">
                     <a href="#">
-                      <span className="sr-only">Your Company</span>
+                      <span className="sr-only">Digipass</span>
                       <h1 className="text-white text-2xl font-light">
-                        TravelCard
+                        Digipass
                       </h1>
                     </a>
                   </div>
@@ -290,6 +291,7 @@ export default function Home() {
                     </div>
                   </div>
                 </section>
+                <Tap/>
               </div>
             </div>
           </div>
@@ -298,7 +300,7 @@ export default function Home() {
           <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:max-w-7xl lg:px-8">
             <div className="border-t border-gray-200 py-8 text-center text-sm text-gray-500 sm:text-left">
               <span className="block sm:inline">
-                &copy; 2021 Your Company, Inc.
+                &copy; 2023 Digipass, Inc.
               </span>{" "}
               <span className="block sm:inline">All rights reserved.</span>
             </div>

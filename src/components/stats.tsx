@@ -1,102 +1,128 @@
-"use client"
-import { ArrowDownIcon, ArrowUpIcon } from "@heroicons/react/20/solid";
+"use client";
+import {
+  TrophyIcon,
+  CurrencyPoundIcon,
+  FaceSmileIcon,
+} from "@heroicons/react/20/solid";
 import {
   CursorArrowRaysIcon,
   EnvelopeOpenIcon,
   UsersIcon,
 } from "@heroicons/react/24/outline";
+import { useContractRead, useAccount } from "wagmi";
+import { abi } from "../abi";
 
-const stats = [
-  {
-    id: 1,
-    name: "Total Travels",
-    stat: "71,897",
-    icon: UsersIcon,
-    change: "122",
-    changeType: "increase",
-  },
-  {
-    id: 2,
-    name: "Total Cost",
-    stat: "58.16%",
-    icon: EnvelopeOpenIcon,
-    change: "5.4%",
-    changeType: "increase",
-  },
-  {
-    id: 3,
-    name: "NFTs Earned",
-    stat: "24.57%",
-    icon: CursorArrowRaysIcon,
-    change: "3.2%",
-    changeType: "decrease",
-  },
-];
-
-function classNames(...classes: string[]) {
-  return classes.filter(Boolean).join(" ");
+function calculateTotalPrice(items: Travel[]) {
+  return (
+    items
+      .reduce((sum, item) => {
+        let price = parseFloat(item.price.replace("£", ""));
+        return sum + price;
+      }, 0)
+      .toFixed(2) + "£"
+  );
+}
+interface Travel {
+  chainlinkId: `0x${string}`;
+  tokenId: bigint;
+  timestamp: bigint;
+  price: string;
+  destination: string;
+  uri: string;
+}
+function countTokenIdOccurrences(items: Travel[], tokenId: number) {
+  return items.filter((item) => Number(item.tokenId) === Number(tokenId)).length;
 }
 
 export default function Stats() {
+  const { address, isConnecting, isDisconnected } = useAccount();
+  const {
+    data: tokenId,
+    isError: tokenIdError,
+    isLoading: tokenIdLoading,
+  } = useContractRead({
+    address: "0xa342ADDe4b4170Ac2aeD0aFf782BCa296c9d4465",
+    abi: abi,
+    functionName: "tokensOfOwner",
+    chainId: 43113,
+    args: [address ? address : "0x00"],
+  });
+  const {
+    data: travels,
+    isError,
+    isLoading,
+  } = useContractRead({
+    address: "0xa342ADDe4b4170Ac2aeD0aFf782BCa296c9d4465",
+    abi: abi,
+    functionName: "getTravels",
+    chainId: 43113,
+  });
   return (
     <div>
       <dl className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {stats.map((item) => (
-          <div
-            key={item.id}
-            className="relative overflow-hidden rounded-lg bg-white px-4 pt-5 shadow sm:px-6 sm:pt-6"
-          >
-            <dt>
-              <div className="absolute rounded-md bg-electric-violet-500 p-3">
-                <item.icon className="h-6 w-6 text-white" aria-hidden="true" />
-              </div>
-              <p className="ml-16 truncate text-sm font-medium text-gray-500">
-                {item.name}
-              </p>
-            </dt>
-            <dd className="ml-16 flex items-baseline pb-5">
-              <p className="text-2xl font-semibold text-gray-900">
-                {item.stat}
-              </p>
-              <p
-                className={classNames(
-                  item.changeType === "increase"
-                    ? "text-green-600"
-                    : "text-red-600",
-                  "ml-2 flex items-baseline text-sm font-semibold"
-                )}
-              >
-                {item.changeType === "increase" ? (
-                  <ArrowUpIcon
-                    className="h-5 w-5 flex-shrink-0 self-center text-green-500"
-                    aria-hidden="true"
-                  />
-                ) : (
-                  <ArrowDownIcon
-                    className="h-5 w-5 flex-shrink-0 self-center text-red-500"
-                    aria-hidden="true"
-                  />
-                )}
-
-                <span className="sr-only">
-                  {" "}
-                  {item.changeType === "increase"
-                    ? "Increased"
-                    : "Decreased"}{" "}
-                  by{" "}
-                </span>
-                {item.change}
-              </p>
-              {/* <div className="absolute inset-x-0 bottom-0 bg-gray-50 px-4 py-4 sm:px-6">
-                <div className="text-sm">
-                  <a href="#" className="font-medium text-indigo-600 hover:text-indigo-500">
-                    View all<span className="sr-only"> {item.name} stats</span>
-                  </a>
-                </div>
-              </div> */}
-            </dd>
-          </div>
-        ))}
+        <div
+          key={1}
+          className="relative overflow-hidden rounded-lg bg-white px-4 pt-5 shadow sm:px-6 sm:pt-6"
+        >
+          <dt>
+            <div className="absolute rounded-md bg-electric-violet-500 p-3">
+              <FaceSmileIcon
+                className="h-6 w-6 text-white"
+                aria-hidden="true"
+              />
+            </div>
+            <p className="ml-16 truncate text-sm font-medium text-gray-500">
+              Total Travels
+            </p>
+          </dt>
+          <dd className="ml-16 flex items-baseline pb-5">
+            <p className="text-2xl font-semibold text-gray-900">
+              {/* @ts-ignore lmeow*/}
+              {travels ? countTokenIdOccurrences(travels, tokenId[0]) : null}
+            </p>
+          </dd>
+        </div>
+        <div
+          key={2}
+          className="relative overflow-hidden rounded-lg bg-white px-4 pt-5 shadow sm:px-6 sm:pt-6"
+        >
+          <dt>
+            <div className="absolute rounded-md bg-electric-violet-500 p-3">
+              <CurrencyPoundIcon
+                className="h-6 w-6 text-white"
+                aria-hidden="true"
+              />
+            </div>
+            <p className="ml-16 truncate text-sm font-medium text-gray-500">
+              Total Spent
+            </p>
+          </dt>
+          <dd className="ml-16 flex items-baseline pb-5">
+            <p className="text-2xl font-semibold text-gray-900">
+              {/* @ts-ignore lmeow*/}
+              {travels && calculateTotalPrice(travels)}
+            </p>
+          </dd>
+        </div>
+        <div
+          key={3}
+          className="relative overflow-hidden rounded-lg bg-white px-4 pt-5 shadow sm:px-6 sm:pt-6"
+        >
+          <dt>
+            <div className="absolute rounded-md bg-electric-violet-500 p-3">
+              <TrophyIcon className="h-6 w-6 text-white" aria-hidden="true" />
+            </div>
+            <p className="ml-16 truncate text-sm font-medium text-gray-500">
+              NFTs Earned
+            </p>
+          </dt>
+          <dd className="ml-16 flex items-baseline pb-5">
+            <p className="text-2xl font-semibold text-gray-900">
+              {/* @ts-ignore lmeow*/}
+              {travels ? countTokenIdOccurrences(travels, tokenId[0]) : null}
+            </p>
+          </dd>
+        </div>
       </dl>
     </div>
   );

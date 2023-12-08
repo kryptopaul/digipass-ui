@@ -1,4 +1,5 @@
-"use client"
+"use client";
+import { abi } from "../abi";
 const people = [
   {
     name: "16th Nov 2023",
@@ -29,8 +30,34 @@ const people = [
   // More people...
 ];
 import { ArrowRightCircleIcon } from "@heroicons/react/20/solid";
+import { useContractRead, useAccount } from "wagmi";
 
 export default function LastTravels() {
+  const { address, isConnecting, isDisconnected } = useAccount();
+
+  const {
+    data: travels,
+    isError,
+    isLoading,
+  } = useContractRead({
+    address: "0xa342ADDe4b4170Ac2aeD0aFf782BCa296c9d4465",
+    abi: abi,
+    functionName: "getTravels",
+    chainId: 43113,
+  });
+
+  const {
+    data: tokenId,
+    isError: tokenIdError,
+    isLoading: tokenIdLoading,
+  } = useContractRead({
+    address: "0xa342ADDe4b4170Ac2aeD0aFf782BCa296c9d4465",
+    abi: abi,
+    functionName: "tokensOfOwner",
+    chainId: 43113,
+    args: [address ? address : "0x00"],
+  });
+
   return (
     <div className="px-4 sm:px-6 lg:px-8">
       <div className="sm:flex sm:items-center">
@@ -74,21 +101,30 @@ export default function LastTravels() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 bg-white">
-                {people.map((person) => (
-                  <tr key={person.email}>
+                {travels?.filter(travel => travel.tokenId === tokenId?.[0]).map((travel, key) =>(
+                  <tr key={key}>
                     <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6 lg:pl-8">
-                      {person.name}
+                    {new Intl.DateTimeFormat('en-GB', {
+    day: '2-digit', 
+    month: '2-digit', 
+    year: 'numeric', 
+    hour: '2-digit', 
+    minute: '2-digit', 
+    hour12: false // 24-hour format
+  }).format(new Date(Number(travel.timestamp) * 1000))}
                     </td>
                     <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                      {person.title}
+                      {travel.destination}
                     </td>
                     <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                      {person.email}
+                      {travel.price}
                     </td>
 
                     <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6 lg:pr-8">
-                      <button
+                      <a
+                        href={travel.uri}
                         type="button"
+                        target="_blank"
                         className="inline-flex items-center gap-x-1.5 rounded-md bg-electric-violet-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-electric-violet-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                       >
                         View NFT
@@ -96,7 +132,7 @@ export default function LastTravels() {
                           className="-mr-0.5 h-5 w-5"
                           aria-hidden="true"
                         />
-                      </button>
+                      </a>
                     </td>
                   </tr>
                 ))}
