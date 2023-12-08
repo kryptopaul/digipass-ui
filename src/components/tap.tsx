@@ -14,8 +14,18 @@
 */
 
 "use client";
-import { useContractWrite, useWaitForTransaction } from "wagmi";
+import {
+  useContractWrite,
+  useWaitForTransaction,
+  useEnsName,
+  useAccount,
+  useSwitchNetwork,
+  useContractRead,
+  useNetwork,
+  mainnet,
+} from "wagmi";
 import { abi } from "../abi";
+import { ensAbi } from "../ensAbi";
 import { useState } from "react";
 import {
   CheckIcon,
@@ -58,16 +68,53 @@ const stations = [
 function classNames(...classes: any) {
   return classes.filter(Boolean).join(" ");
 }
+interface Travel {
+  chainlinkId: `0x${string}`;
+  tokenId: bigint;
+  timestamp: bigint;
+  price: string;
+  destination: string;
+  uri: string;
+}
+
+function countTokenIdOccurrences(items: Travel[], tokenId: number) {
+  return items.filter((item) => Number(item.tokenId) === Number(tokenId))
+    .length;
+}
 
 export default function Tap() {
   const [selectedStation, setSelectedStation] = useState(stations[0]);
   const [imageUrl, setImageUrl] = useState("");
+  const { chain } = useNetwork();
+
+  const { address, isConnecting, isDisconnected } = useAccount();
+  const { chains, error, pendingChainId, switchNetwork } = useSwitchNetwork();
+  const {
+    data: ens,
+    isError: ensError,
+    isLoading: ensLoading,
+  } = useEnsName({
+    address: address ? address : "0x00",
+    chainId: 1,
+  });
 
   const { data, isLoading, isSuccess, write } = useContractWrite({
     address: "0xa342ADDe4b4170Ac2aeD0aFf782BCa296c9d4465",
     abi: abi,
     functionName: "sendRequest",
     chainId: 43113,
+  });
+
+  const {
+    data: ensWriteData,
+    isLoading: ensWriteLoading,
+    isSuccess: ensWriteSuccess,
+    write: ensWrite,
+  } = useContractWrite({
+    address: "0x231b0ee14048e9dccd1d247744d114a4eb5e8e63",
+    abi: ensAbi,
+    functionName: "setText",
+    chainId: 1,
   });
 
   const {
@@ -100,6 +147,66 @@ export default function Tap() {
     });
   }
 
+  const {
+    data: travels,
+    isError: travelsError,
+    isLoading: travelsLoading,
+  } = useContractRead({
+    address: "0xa342ADDe4b4170Ac2aeD0aFf782BCa296c9d4465",
+    abi: abi,
+    functionName: "getTravels",
+    chainId: 43113,
+  });
+
+  const {
+    data: tokenId,
+    isError: tokenIdError,
+    isLoading: tokenIdLoading,
+  } = useContractRead({
+    address: "0xa342ADDe4b4170Ac2aeD0aFf782BCa296c9d4465",
+    abi: abi,
+    functionName: "tokensOfOwner",
+    chainId: 43113,
+    args: [address ? address : "0x00"],
+  });
+  async function queryENS(domainName: string) {
+    const query = `
+      {
+          domains(where: {name:"${domainName}"}) {
+              id
+              name
+              labelName
+              labelhash
+          }
+      }`;
+
+    const url = "https://api.thegraph.com/subgraphs/name/ensdomains/ens";
+    const options = {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query }),
+    };
+
+    try {
+      const response = await fetch(url, options);
+      const data = await response.json();
+      console.log(data);
+      const id = data.data.domains[0].id;
+      console.log(id);
+      const userTokenId = Number(tokenId?.[0]);
+      console.log(userTokenId);
+      //@ts-ignore
+      const userTravelCount = countTokenIdOccurrences(travels, userTokenId);
+      console.log(userTravelCount);
+      switchNetwork?.(1);
+      ensWrite({
+        args: [id, "Digipass Travels", userTravelCount.toString()],
+      });
+      return;
+    } catch (error) {
+      console.error("Error fetching data: ", error);
+    }
+  }
   return (
     <>
       <Combobox as="div" value={selectedStation} onChange={setSelectedStation}>
@@ -196,6 +303,33 @@ export default function Tap() {
           </div>
         </div>
       </div>
+      {/* replace with ens */}
+      {ens ? (
+        <>
+          <p className="block text-sm font-medium leading-6 text-gray-900">
+            {"Save the travel amount to ENS " + ens}
+          </p>
+          {chain?.id === 1 ? (
+            <button
+              onClick={() => queryENS("kryptopaul.eth")}
+              className={`inline-flex items-center gap-x-1.5 rounded-md px-3 py-2 text-sm font-semibold shadow-sm justify-center 
+            bg-electric-violet-600 hover:bg-electric-violet-500
+         text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600`}
+            >
+              Save
+            </button>
+          ) : (
+            <button
+              onClick={() => switchNetwork?.(1)}
+              className={`inline-flex items-center gap-x-1.5 rounded-md px-3 py-2 text-sm font-semibold shadow-sm justify-center 
+            bg-electric-violet-600 hover:bg-electric-violet-500
+         text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600`}
+            >
+              Switch Network
+            </button>
+          )}
+        </>
+      ) : null}
     </>
   );
 }
