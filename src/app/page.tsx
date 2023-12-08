@@ -37,6 +37,7 @@ export default function Home() {
   const { address, isConnected } = useAccount();
   const { data, isError, isLoading } = useEnsName({
     address: address,
+    chainId: 1
   })
   return (
     <>
