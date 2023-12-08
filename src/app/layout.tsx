@@ -9,7 +9,7 @@ import {
   getDefaultWallets,
   lightTheme
 } from "@rainbow-me/rainbowkit";
-import { configureChains, createConfig, WagmiConfig } from "wagmi";
+import { configureChains, createConfig, mainnet, WagmiConfig } from "wagmi";
 import { avalancheFuji} from "wagmi/chains";
 import { alchemyProvider } from "wagmi/providers/alchemy";
 import { publicProvider } from "wagmi/providers/public";
@@ -22,7 +22,7 @@ const metadata: Metadata = {
 };
 
 const { chains, publicClient } = configureChains(
-  [avalancheFuji],
+  [avalancheFuji, mainnet],
   [publicProvider()]
 );
 
