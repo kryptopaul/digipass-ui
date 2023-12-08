@@ -25,6 +25,7 @@ export async function GET(request: Request) {
     "Notting Hill Gate": "3.60£",
     "Earl's Court": "4.50£",
     "St. Pancras International": "3.80£",
+    "Bond_Street": "3.40£",
   };
 
   const { searchParams } = new URL(request.url);
