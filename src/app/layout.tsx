@@ -54,6 +54,7 @@ export default function RootLayout({
               overlayBlur: "small",
             })}
             chains={chains}
+            initialChain={avalancheFuji}
           >
             {children}{" "}
           </RainbowKitProvider>
