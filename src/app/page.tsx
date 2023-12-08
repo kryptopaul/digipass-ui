@@ -293,7 +293,7 @@ export default function Home() {
                     ) : (
                       <div className="p-6">
                         <h1 className="text-2xl font-semibold text-gray-900">
-                          Welcome to your TravelCard!
+                          Welcome to Digipass!
                         </h1>
                         <p className="mt-2 text-sm text-gray-500">
                           Please connect your wallet to continue.
