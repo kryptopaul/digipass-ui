@@ -1,15 +1,24 @@
 "use client";
-import dynamic from 'next/dynamic'
- import { Fragment } from "react";
+import dynamic from "next/dynamic";
+import { Fragment } from "react";
 import { Menu, Popover, Transition } from "@headlessui/react";
 import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
 import Image from "next/image";
 import Stats from "@/components/stats";
 import LastTravels from "@/components/lasttravels";
-import { useAccount, useConnect, useDisconnect,useEnsName } from "wagmi";
+import {
+  useAccount,
+  useConnect,
+  useDisconnect,
+  useEnsName,
+  useContractRead,
+  usePrepareContractWrite,
+  useContractWrite,
+} from "wagmi";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import Tap from '@/components/tap';
+import Tap from "@/components/tap";
+import { abi } from "../abi";
 const user = {
   name: "Tom Cook",
   email: "tom@example.com",
@@ -37,8 +46,32 @@ export default function Home() {
   const { address, isConnected } = useAccount();
   const { data, isError, isLoading } = useEnsName({
     address: address,
-    chainId: 1
-  })
+    chainId: 1,
+  });
+
+  const {
+    data: balance,
+    isError: balanceError,
+    isLoading: balanceLoading,
+  } = useContractRead({
+    address: "0xa342ADDe4b4170Ac2aeD0aFf782BCa296c9d4465",
+    abi: abi,
+    functionName: "balanceOf",
+    chainId: 43113,
+    args: [address ? address : "0x00"],
+  });
+
+  const {
+    data: mintData,
+    isLoading: mintLoading,
+    isSuccess: mintSuccess,
+    write,
+  } = useContractWrite({
+    address: "0xa342ADDe4b4170Ac2aeD0aFf782BCa296c9d4465",
+    abi: abi,
+    functionName: "mint",
+    chainId: 43113,
+  });
   return (
     <>
       <div className="min-h-full bg-gray-50">
@@ -265,7 +298,7 @@ export default function Home() {
                         <p className="mt-2 text-sm text-gray-500">
                           Please connect your wallet to continue.
                         </p>
-                        <br/>
+                        <br />
                         <ConnectButton />
                       </div>
                     )}
@@ -288,13 +321,34 @@ export default function Home() {
                         alt="nft"
                         style={{
                           borderRadius: 5,
-                          filter: isConnected ? "" : "blur(10px)"
+                          filter:
+                            !isConnected || Number(balance) === 0
+                              ? "blur(10px)"
+                              : "none",
                         }}
                       />
                     </div>
                   </div>
                 </section>
-                <Tap/>
+                {isConnected && Number(balance) === 0 ? (
+                  <>
+                    <p className="mt-2 text-sm text-gray-500">
+                      {"You don't have a Digipass yet."}
+                    </p>
+                    <button
+                      onClick={() => write()}
+                      className={`inline-flex items-center gap-x-1.5 rounded-md px-3 py-2 text-sm font-semibold shadow-sm justify-center 
+            bg-electric-violet-600 hover:bg-electric-violet-500
+         text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600`}
+                    >
+                      Mint
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Tap />
+                  </>
+                )}
               </div>
             </div>
           </div>

@@ -83,7 +83,7 @@ export default function Stats() {
           <dd className="ml-16 flex items-baseline pb-5">
             <p className="text-2xl font-semibold text-gray-900">
               {/* @ts-ignore lmeow*/}
-              {travels ? countTokenIdOccurrences(travels, tokenId[0]) : null}
+              {travels && tokenId ? countTokenIdOccurrences(travels, tokenId[0]) : null}
             </p>
           </dd>
         </div>
@@ -105,7 +105,7 @@ export default function Stats() {
           <dd className="ml-16 flex items-baseline pb-5">
             <p className="text-2xl font-semibold text-gray-900">
               {/* @ts-ignore lmeow*/}
-              {travels && calculateTotalPrice(travels, tokenId[0])}
+              {travels && tokenId ? calculateTotalPrice(travels, tokenId[0]) : null}
             </p>
           </dd>
         </div>
@@ -124,7 +124,7 @@ export default function Stats() {
           <dd className="ml-16 flex items-baseline pb-5">
             <p className="text-2xl font-semibold text-gray-900">
               {/* @ts-ignore lmeow*/}
-              {travels ? countTokenIdOccurrences(travels, tokenId[0]) : null}
+              {travels && tokenId ? countTokenIdOccurrences(travels, tokenId[0]) : null}
             </p>
           </dd>
         </div>
