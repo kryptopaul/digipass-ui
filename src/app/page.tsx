@@ -346,7 +346,10 @@ export default function Home() {
                   </>
                 ) : (
                   <>
+                  {isConnected?
                     <Tap />
+                    :
+                    null}
                   </>
                 )}
               </div>
